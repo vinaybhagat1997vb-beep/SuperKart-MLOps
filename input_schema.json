@@ -1,0 +1,79 @@
+{
+    "feature_columns": [
+        "Product_Weight",
+        "Product_Sugar_Content",
+        "Product_Allocated_Area",
+        "Product_Type",
+        "Product_MRP",
+        "Store_Id",
+        "Store_Establishment_Year",
+        "Store_Size",
+        "Store_Location_City_Type",
+        "Store_Type"
+    ],
+    "numerical": {
+        "Product_Weight": {
+            "default": 12.655000000000001,
+            "integer": false
+        },
+        "Product_Allocated_Area": {
+            "default": 0.055,
+            "integer": false
+        },
+        "Product_MRP": {
+            "default": 146.585,
+            "integer": false
+        },
+        "Store_Establishment_Year": {
+            "default": 2009.0,
+            "integer": true
+        }
+    },
+    "categorical": {
+        "Product_Sugar_Content": [
+            "Low Sugar",
+            "No Sugar",
+            "Regular"
+        ],
+        "Product_Type": [
+            "Baking Goods",
+            "Breads",
+            "Breakfast",
+            "Canned",
+            "Dairy",
+            "Frozen Foods",
+            "Fruits and Vegetables",
+            "Hard Drinks",
+            "Health and Hygiene",
+            "Household",
+            "Meat",
+            "Others",
+            "Seafood",
+            "Snack Foods",
+            "Soft Drinks",
+            "Starchy Foods"
+        ],
+        "Store_Id": [
+            "OUT001",
+            "OUT002",
+            "OUT003",
+            "OUT004"
+        ],
+        "Store_Size": [
+            "High",
+            "Medium",
+            "Small"
+        ],
+        "Store_Location_City_Type": [
+            "Tier 1",
+            "Tier 2",
+            "Tier 3"
+        ],
+        "Store_Type": [
+            "Departmental Store",
+            "Food Mart",
+            "Supermarket Type1",
+            "Supermarket Type2"
+        ]
+    }
+}
