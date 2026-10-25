@@ -32,10 +32,10 @@ TARGET = "Product_Store_Sales_Total"
 RANDOM_STATE = 42
 TEST_SIZE = 0.20
 
-# GitHub Actions will provide this token as a secret
+# GitHub Actions provides this token as a secret
 HF_TOKEN = os.getenv("HF_TOKEN")
 
-# Save files inside the project's data folder
+# Define project and data directories
 PROJECT_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = PROJECT_DIR / "data"
 
@@ -89,24 +89,24 @@ def prepare_data():
     # Remove exact duplicate records
     df_clean.drop_duplicates(inplace=True)
 
-    # Remove rows with missing target values
-# Ensure target contains valid numerical values
-df_clean[TARGET] = pd.to_numeric(
-    df_clean[TARGET],
-    errors="coerce"
-)
+    # Convert target to numeric
+    df_clean[TARGET] = pd.to_numeric(
+        df_clean[TARGET],
+        errors="coerce"
+    )
 
-# Replace infinite target values with NaN
-df_clean[TARGET] = df_clean[TARGET].replace(
-    [np.inf, -np.inf],
-    np.nan
-)
+    # Replace infinite target values with NaN
+    df_clean[TARGET] = df_clean[TARGET].replace(
+        [np.inf, -np.inf],
+        np.nan
+    )
 
-# Remove records with invalid target values
-df_clean.dropna(
-    subset=[TARGET],
-    inplace=True
-)
+    # Remove records with invalid target values
+    df_clean.dropna(
+        subset=[TARGET],
+        inplace=True
+    )
+
     # Convert numerical columns to correct data types
     numeric_columns = [
         "Product_Weight",
@@ -172,11 +172,13 @@ df_clean.dropna(
     # Upload requires a write-enabled token
     if not HF_TOKEN:
         raise RuntimeError(
-            "HF_TOKEN is missing. Configure it in GitHub Actions secrets."
+            "HF_TOKEN is missing. "
+            "Configure it in GitHub Actions secrets."
         )
 
     api = HfApi(token=HF_TOKEN)
 
+    # Upload training dataset
     api.upload_file(
         path_or_fileobj=str(train_path),
         path_in_repo="data/train.csv",
@@ -185,6 +187,7 @@ df_clean.dropna(
         commit_message="Automated training dataset update"
     )
 
+    # Upload testing dataset
     api.upload_file(
         path_or_fileobj=str(test_path),
         path_in_repo="data/test.csv",
