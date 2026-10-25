@@ -1,0 +1,97 @@
+name: SuperKart MLOps CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+  workflow_dispatch:
+    inputs:
+      register_model:
+        description: "Register newly trained model on Hugging Face"
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+
+  mlops-pipeline:
+    name: Data Validation and Model Training
+    runs-on: ubuntu-latest
+
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      PYTHONUNBUFFERED: "1"
+
+    steps:
+
+      # Step 1: Checkout GitHub repository
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Step 2: Configure Python environment
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      # Step 3: Install dependencies
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
+
+      # Step 4: Validate Python scripts
+      - name: Validate Python Syntax
+        run: |
+          python -m py_compile src/data_preparation.py
+          python -m py_compile src/train.py
+          python -m py_compile tests/test_pipeline.py
+
+      # Step 5: Prepare data during manual workflow
+      - name: Data Preparation
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          python src/data_preparation.py
+
+      # Step 6: Execute automated tests
+      - name: Run Unit Tests
+        run: |
+          python -m pytest tests/ -v
+
+      # Step 7: Automated model training
+      - name: Train and Evaluate Models
+        env:
+          N_ITER: ${{ github.event_name == 'workflow_dispatch' && '10' || '2' }}
+          REGISTER_MODEL: ${{ github.event_name == 'workflow_dispatch' && inputs.register_model && 'true' || 'false' }}
+        run: |
+          python src/train.py
+
+      # Step 8: Upload training artifacts to GitHub
+      - name: Upload Model Artifacts
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: superkart-model-artifacts
+          path: |
+            models/best_superkart_model.joblib
+            models/model_metrics.json
+            models/model_comparison.csv
+          retention-days: 7
+
+      # Step 9: Confirm workflow completion
+      - name: Pipeline Summary
+        if: success()
+        run: |
+          echo "SuperKart MLOps workflow completed."
+          echo "Training and validation successful."
+
